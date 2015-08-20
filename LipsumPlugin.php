@@ -21,19 +21,38 @@ class LipsumPlugin extends Herbie\Plugin
     protected $categories = ['abstract', 'animals', 'business', 'cats', 'city', 'food', 'nightlife', 'fashion', 'people', 'nature', 'sports', 'technics', 'transport'];
 
     /**
-     * @param Herbie\Event $event
+     * @return array
      */
-    public function onTwigInitialized(Herbie\Event $event)
+    public function getSubscribedEvents()
     {
-        $event['twig']->addFunction(
+        $events = [];
+        if ((bool)$this->config('plugins.config.lipsum.twig', false)) {
+            $events[] = 'onTwigInitialized';
+        }
+        if ((bool)$this->config('plugins.config.lipsum.shortcode', true)) {
+            $events[] = 'onShortcodeInitialized';
+        }
+        return $events;
+    }
+
+    public function onTwigInitialized($twig)
+    {
+        $twig->addFunction(
             new Twig_SimpleFunction('lipsum_image', [$this, 'image'], ['is_safe' => ['html']])
         );
-        $event['twig']->addFunction(
+        $twig->addFunction(
             new Twig_SimpleFunction('lipsum_text', [$this, 'text'], ['is_safe' => ['html']])
         );
-        $event['twig']->addFunction(
+        $twig->addFunction(
             new Twig_SimpleFunction('lipsum_title', [$this, 'title'], ['is_safe' => ['html']])
         );
+    }
+
+    public function onShortcodeInitialized($shortcode)
+    {
+        $shortcode->add('lipsum_image', [$this, 'imageShortcode']);
+        $shortcode->add('lipsum_title', [$this, 'title']);
+        $shortcode->add('lipsum_text', [$this, 'text']);
     }
 
     /**
@@ -58,13 +77,25 @@ class LipsumPlugin extends Herbie\Plugin
     {
         $helper = new LoremIpsum();
         $helper->shuffle();
-        return $helper->display('sentences', 1);
+        return $helper->display('sentences', 1, false);
     }
 
-    public function text($type)
+    public function text()
     {
         $helper = new LoremIpsum();
         $helper->shuffle();
-        return $helper->display('sentences', 10) . '.';
+        return $helper->display('sentences', 10, false) . '.';
     }
+
+    public function imageShortcode($options)
+    {
+        $options = $this->initOptions([
+            'width' => 200,
+            'height' => 200,
+            'category' => '',
+            'text' => '',
+        ], $options);
+        return call_user_func_array([$this, 'image'], $options);
+    }
+
 }
