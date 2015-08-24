@@ -13,3 +13,35 @@ Danach aktivierst du das Plugin in der Konfigurationsdatei.
     plugins:
         enable:
             - lipsum
+
+
+## Konfiguration
+
+Unter `plugins.config.lipsum` stehen dir die folgenden Optionen zur Verfügung:
+
+    # enable shortcodes
+    shortcode: true
+    
+    # enable twig functions
+    twig: false
+    
+    
+## Anwendung
+
+Die Shortcodes können wie folgt angewendet werden:
+
+    [lipsum_titel]
+
+    [lipsum_text]
+
+    [lipsum_image width="240" height="120" category="abstract"]
+
+Mit dem Aktivieren der Twig-Funktionen kannst du diese auch in Layoutdateien einsetzen:
+     
+    {{ lipsum_titel() }}    
+
+    {{ lipsum_text() }}    
+
+    {{ lipsum_image(width="240", height="120", category="abstract") }}    
+    
+    
